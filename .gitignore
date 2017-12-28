@@ -1,2 +1,5 @@
 *.csv
 *.tsv
+.git
+.ipnb_checkpoints/
+misc/
