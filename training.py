@@ -1,5 +1,8 @@
 import tensorflow as tf
 import os, time
+from CharNet import CharNet
+from CharNetConfig import CharNetConfig
+from Data import Data
 
 def main(train_file, dev_file, config):
     train_data = Data(train_file, config.alstr)

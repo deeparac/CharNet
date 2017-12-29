@@ -7,7 +7,6 @@ class Data(object):
         self.alstr = alstr
         self.is_dev = is_dev
         self.batch_size = batch_size
-        self.batch
         self.raw_data = pd.read_csv(file_path, sep='\t')
 
         self.alphabet = self.make_alphabet(self.alstr)

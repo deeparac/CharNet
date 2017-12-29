@@ -2,4 +2,5 @@
 *.tsv
 .git
 .ipnb_checkpoints/
+runs/
 misc/
