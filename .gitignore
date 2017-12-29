@@ -1,6 +1,7 @@
 *.csv
 *.tsv
 .git
+__pycache__/
 .ipnb_checkpoints/
 runs/
 misc/
