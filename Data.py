@@ -14,19 +14,26 @@ class Data(object):
         self.alphabet_size = len(self.alphabet)
 
         self.x, self.y = self.format_data(self.raw_data)
-        self.input_x, self.input_num = x['desc_vecs'].values, x.drop(['desc_vecs']).values
-
+        self.input_x = self.x['desc_vecs'].values
+        self.input_num = self.x.drop(['desc_vecs'], axis=1).values
+            
     def shuffling(self):
-        shuffle_indices = np.random.permutation(np.arange(len(self.y)))
+        shuffle_indices = np.random.permutation(np.arange(len(self.input_x)))
         self.input_x = self.input_x[shuffle_indices]
         self.input_num = self.input_num[shuffle_indices]
         self.y = self.y[shuffle_indices]
 
-    def next_batch(self):
-        for i in range(len(self.y) / self.batch_size):
-            start = i * self.batch_size
-            end = min((i + 1) * self.batch_size, len(self.y))
-            yield self.input_x[start:end], self.input_num[start:end], self.y[start, end]
+    def next_batch(self, batch_num):
+        data_size = len(self.input_x)
+        start = batch_num * self.batch_size
+        end = min((batch_num + 1) * self.batch_size, data_size)
+        batch_x = self.input_x[start:end]
+        batch_num = self.input_num[start:end]
+        if self.is_dev == False:
+            batch_y = self.y[start:end]
+        else:
+            batch_y = None
+        return batch_x, batch_num, batch_y
 
     def process_full_description(self, df):
         df['desc_vecs'] = df['item_description'].apply(
@@ -42,8 +49,7 @@ class Data(object):
                           'subcat_2'
                       ]):
         for col in col_lists:
-            df[col] = \
-                df[col].apply(lambda x: str(x))
+            df[col] = df[col].apply(lambda x: str(x))
             encoder = LabelEncoder()
             encoder.fit(df[col])
             df[col] = encoder.transform(df[col])
@@ -64,16 +70,17 @@ class Data(object):
         df = df[pd.notnull(df['item_description'])]
         df = self.process_full_description(df)
         df['item_description'] = df['name'] + ' ' + df['item_description']
-        df = df.drop(columns=['name', 'category_name',
-                              'train_id', 'item_description'])
+        df = df.drop(columns=['name', 'category_name', 'item_description'])
         if self.is_dev:
+            df = df.drop(columns=['test_id'])
             price = None
             features = df
         else:
-            price = df['price']
+            df = df.drop(columns=['train_id'])
+            price = df['price'].values
             features = df.drop(columns=['price'])
 
-        return features, price.values
+        return features, price
 
     def one_hot_encoder(self, alphabet):
         encoder_dict = {}
@@ -91,7 +98,7 @@ class Data(object):
         encoder = np.array(encoder, dtype='float32')
         return encoder, encoder_dict
 
-    def doc_process(self, desc, e_dict, l=500):
+    def doc_process(self, desc, e_dict, l=128):
         desc = desc.strip().lower()
         min_len = min(l, len(desc))
         doc_vec = np.zeros(l, dtype='int64')
@@ -104,5 +111,3 @@ class Data(object):
 
     def make_alphabet(self, alstr):
         return [char for char in alstr]
-
-# train = Data(train_file, config.alstr)

@@ -30,7 +30,7 @@ class CharNet(object):
             self.dropout_keep_prob = tf.placeholder(tf.float32,
                                                     name='dropout_keep_prob')
 
-        with tf.name_scope('Embedding'), tf.device('/cpu:0'):
+        with tf.name_scope('Embedding'):
             x = tf.nn.embedding_lookup(encoder, self.input_x)
             x = tf.expand_dims(x, -1)
 
@@ -83,13 +83,9 @@ class CharNet(object):
                             dtype='float32', name='W')
             b = tf.Variable(initializer([1]),
                             dtype='float32', name='W')
-            self.yhat = tf.nn.xw_plus_b(x, W, b, name='output')
+            yhat = tf.nn.xw_plus_b(x, W, b, name='output')
+            self.yhat = tf.reshape(yhat, [-1])
 
         with tf.name_scope("Loss"):
-            self.loss = tf.sqrt(
-                tf.reduce_mean(
-                    tf.square(
-                        tf.log(self.yhat + 1) - tf.log(self.input_y + 1)
-                    )
-                )
-            )
+            y = tf.reshape(self.input_y, [-1])
+            self.loss = tf.keras.metrics.mean_squared_logarithmic_error(self.yhat, y)

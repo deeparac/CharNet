@@ -9,8 +9,8 @@ class CharNetConfig(object):
                     [256, 3, None],
                     [256, 3, 3]
                 ]
-            self.fc_layers = [1024, 1024]
-            self.l0 = 500
+            self.fc_layers = [512, 10]
+            self.l0 = 128
             self.alstr = 'abcdefghijklmnopqrstuvwxyz0123456789-,;.!?:’’’/\|_@#$%ˆ&* ̃‘+-=<>()[]{}]'
             self.alphabet_size = len(self.alstr)
         else:
